@@ -1,0 +1,6 @@
+
+# YT Manager specific
+archive/
+app/db/*.db
+*.log
+app.log

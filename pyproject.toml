@@ -1,0 +1,14 @@
+[project]
+name = "yt-manager"
+version = "0.1.0"
+description = "A desktop application to manage a queue of YouTube videos."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-api-python-client",
+    "google-auth-oauthlib",
+    "google-auth-httplib2",
+    "python-dotenv",
+    "toml",
+    "pillow",
+]

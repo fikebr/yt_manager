@@ -1,0 +1,8 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Red Rectangle with rounded corners -->
+  <rect x="4" y="12" width="56" height="40" rx="10" ry="10" fill="#FF0000" />
+  
+  <!-- White 'Y' -->
+  <text x="32" y="43" font-family="Arial, sans-serif" font-weight="bold" font-size="30" text-anchor="middle" fill="white">Y</text>
+</svg>
+

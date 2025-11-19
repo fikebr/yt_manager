@@ -1,0 +1,14 @@
+# yt-dlp configuration file
+--no-mtime
+--ignore-errors
+--restrict-filenames
+--verbose
+
+--output "%(uploader)s/%(uploader)s %(upload_date)s %(title)s %(id)s.%(ext)s"
+
+--extractor-args "youtube:player_js_version=actual" 
+--format "best[ext=mp4]/best"
+--no-playlist
+--cookies "E:/Programs/Path/ytdl_cookies.txt"
+
+# --exec "start \"\" E:\PortableApps\PortableApps\MPC-BEPortable\MPC-BEPortable.exe {}"
