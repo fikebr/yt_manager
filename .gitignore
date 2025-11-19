@@ -4,3 +4,4 @@ archive/
 app/db/*.db
 *.log
 app.log
+.env
