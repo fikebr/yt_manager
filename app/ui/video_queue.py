@@ -150,6 +150,12 @@ class MainWindow(tk.Tk):
         db_btn = ttk.Button(bot_frame, text="Open DB", command=self.open_db)
         db_btn.pack(side="left", padx=5)
 
+        tree_new_btn = ttk.Button(bot_frame, text="Tree New", command=self.open_treesize_new)
+        tree_new_btn.pack(side="left", padx=5)
+
+        tree_archive_btn = ttk.Button(bot_frame, text="Tree Archive", command=self.open_treesize_archive)
+        tree_archive_btn.pack(side="left", padx=5)
+
     def add_video(self):
         url = self.url_var.get().strip()
         if url:
@@ -206,3 +212,10 @@ class MainWindow(tk.Tk):
 
     def open_db(self):
         self.app_logic.open_db_browser()
+
+    def open_treesize_new(self):
+        self.app_logic.open_treesize_new()
+
+    def open_treesize_archive(self):
+        self.app_logic.open_treesize_archive()
+

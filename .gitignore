@@ -1,7 +1,18 @@
 
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
 # YT Manager specific
 archive/
 app/db/*.db
 *.log
 app.log
-.env
