@@ -4,7 +4,7 @@ from app.db import video as db
 from app.core.google import GoogleManager
 from app.core.ytdlp import YTDLPManager
 from app.core.videos import VideoManager
-from app.settings import DB_BROWSER_PATH, DB_PATH
+from app.settings import DB_BROWSER_PATH, DB_PATH, TREESIZE, DOWNLOAD_DIR, ARCHIVE_DIR
 from app.utils.logger import setup_logging
 
 logger = setup_logging()
@@ -43,6 +43,34 @@ class YTManagerApp:
             subprocess.Popen([DB_BROWSER_PATH, str(DB_PATH)])
         except Exception as e:
             logger.error(f"Failed to open DB Browser: {e}")
+
+    def open_treesize_new(self):
+        if not TREESIZE:
+            logger.error("TreeSize path not configured.")
+            return
+        try:
+            # Convert forward slashes to backslashes for Windows paths
+            treesize_path = TREESIZE.replace('/', '\\')
+            download_dir = DOWNLOAD_DIR.replace('/', '\\')
+            logger.info(f"Opening TreeSize: {treesize_path} with {download_dir}")
+            # Use shell=True to avoid elevation issues on Windows
+            subprocess.Popen(f'"{treesize_path}" "{download_dir}"', shell=True)
+        except Exception as e:
+            logger.error(f"Failed to open TreeSize: {e}")
+
+    def open_treesize_archive(self):
+        if not TREESIZE:
+            logger.error("TreeSize path not configured.")
+            return
+        try:
+            # Convert forward slashes to backslashes for Windows paths
+            treesize_path = TREESIZE.replace('/', '\\')
+            archive_dir = ARCHIVE_DIR.replace('/', '\\')
+            logger.info(f"Opening TreeSize: {treesize_path} with {archive_dir}")
+            # Use shell=True to avoid elevation issues on Windows
+            subprocess.Popen(f'"{treesize_path}" "{archive_dir}"', shell=True)
+        except Exception as e:
+            logger.error(f"Failed to open TreeSize: {e}")
 
     # ----------------------------------------------------------------
     # Delegate to VideoManager

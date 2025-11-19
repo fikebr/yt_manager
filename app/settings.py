@@ -12,6 +12,7 @@ DB_PATH = BASE_DIR / "app" / "db" / "yt-manager.db"
 YT_API_KEY = os.getenv("YT_API_KEY", "")
 PLAYER_EXE_PATH = os.getenv("PLAYER_EXE_PATH", r"E:\PortableApps\PortableApps\MPC-BEPortable\MPC-BEPortable.exe")
 DB_BROWSER_PATH = os.getenv("DB_BROWSER_PATH", r"E:\PortableApps\PortableApps\SQLiteDatabaseBrowserPortable\SQLiteDatabaseBrowserPortable.exe")
+TREESIZE = os.getenv("TREESIZE", r"E:/PortableApps/PortableApps/TreeSizeFreePortable/TreeSizeFreePortable.exe")
 DOWNLOAD_DIR = os.getenv("DOWNLOAD_DIR", r"N:/Videos/_New/fromMPC")
 ARCHIVE_DIR = os.getenv("ARCHIVE_DIR", r"N:\Videos\_fromMPC")
 
