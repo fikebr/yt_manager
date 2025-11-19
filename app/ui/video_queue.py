@@ -32,6 +32,44 @@ class ScrollableFrame(ttk.Frame):
 
         canvas.configure(yscrollcommand=scrollbar.set)
 
+        # Bind mouse wheel events for scrolling
+        def _on_mousewheel(event):
+            # Windows and Linux
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        
+        def _on_mousewheel_linux(event):
+            # Linux alternative
+            if event.num == 4:
+                canvas.yview_scroll(-1, "units")
+            elif event.num == 5:
+                canvas.yview_scroll(1, "units")
+        
+        # Bind mouse wheel to canvas and scrollable frame
+        canvas.bind("<MouseWheel>", _on_mousewheel)  # Windows
+        canvas.bind("<Button-4>", _on_mousewheel_linux)  # Linux scroll up
+        canvas.bind("<Button-5>", _on_mousewheel_linux)  # Linux scroll down
+        
+        # Also bind to the scrollable frame so scrolling works when hovering over it
+        self.scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
+        self.scrollable_frame.bind("<Button-4>", _on_mousewheel_linux)
+        self.scrollable_frame.bind("<Button-5>", _on_mousewheel_linux)
+        
+        # Bind to parent window when mouse enters canvas area (for better Windows support)
+        # This ensures mouse wheel works even when canvas doesn't have focus
+        def _on_enter(event):
+            container.bind_all("<MouseWheel>", _on_mousewheel)
+        
+        def _on_leave(event):
+            container.unbind_all("<MouseWheel>")
+        
+        canvas.bind("<Enter>", _on_enter)
+        canvas.bind("<Leave>", _on_leave)
+        self.scrollable_frame.bind("<Enter>", _on_enter)
+        self.scrollable_frame.bind("<Leave>", _on_leave)
+        
+        # Store canvas reference for potential future use
+        self.canvas = canvas
+
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
