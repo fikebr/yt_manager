@@ -20,18 +20,36 @@ class YTManagerApp:
     # Utility / Shared Logic
     # ----------------------------------------------------------------
 
-    def extract_video_id(self, url: str) -> str:
-        """Extracts video ID from YouTube URL."""
+    def extract_video_id(self, input_str: str) -> str:
+        """Extracts video ID from YouTube URL or returns the input if it's a plain video ID."""
+        input_str = input_str.strip()
+        
+        # First, try to extract from URL
         try:
-            parsed = urllib.parse.urlparse(url)
+            parsed = urllib.parse.urlparse(input_str)
             if parsed.hostname == 'youtu.be':
-                return parsed.path[1:]
+                video_id = parsed.path[1:]
+                if video_id:
+                    return video_id
             if parsed.hostname in ('www.youtube.com', 'youtube.com'):
                 if parsed.path == '/watch':
                     p = urllib.parse.parse_qs(parsed.query)
-                    return p.get('v', [None])[0]
+                    video_id = p.get('v', [None])[0]
+                    if video_id:
+                        return video_id
         except Exception as e:
-            logger.error(f"Error extracting ID from {url}: {e}")
+            logger.debug(f"Error parsing as URL: {e}")
+        
+        # If URL parsing failed, check if input looks like a video ID
+        # YouTube video IDs are typically 11 characters, alphanumeric + '-' and '_'
+        # But we'll be lenient and accept anything that doesn't look like a URL
+        if input_str and not input_str.startswith(('http://', 'https://', 'www.')):
+            # Check if it looks like a valid video ID (reasonable length, no spaces)
+            if len(input_str) >= 8 and len(input_str) <= 20 and ' ' not in input_str:
+                logger.info(f"Treating input as plain video ID: {input_str}")
+                return input_str
+        
+        logger.error(f"Could not extract video ID from: {input_str}")
         return None
 
     def open_db_browser(self):
@@ -76,11 +94,22 @@ class YTManagerApp:
     # Delegate to VideoManager
     # ----------------------------------------------------------------
 
-    def add_video(self, url: str):
-        video_id = self.extract_video_id(url)
+    def add_video(self, input_str: str):
+        """Adds a video by URL or video ID. Constructs canonical URL if needed."""
+        input_str = input_str.strip()
+        video_id = self.extract_video_id(input_str)
         if not video_id:
-            logger.error(f"Invalid URL or could not extract ID: {url}")
+            logger.error(f"Invalid URL or video ID: {input_str}")
             return
+        
+        # If input was a plain video ID, construct the canonical URL
+        # Otherwise, use the provided URL
+        if input_str.startswith(('http://', 'https://', 'www.')):
+            url = input_str
+        else:
+            url = f"https://www.youtube.com/watch?v={video_id}"
+            logger.info(f"Constructed canonical URL from video ID: {url}")
+        
         self.video_manager.add_video(url, video_id)
 
     def get_all_videos(self):
