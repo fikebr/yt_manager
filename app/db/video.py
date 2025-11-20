@@ -151,6 +151,21 @@ def update_video_filepath(video_id: int, file_path: str):
     conn.commit()
     conn.close()
 
+def update_video_url(video_id: int, url: str):
+    """Updates the URL of a video."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    now = datetime.datetime.now()
+    
+    cursor.execute('''
+        UPDATE videos 
+        SET url = ?, modified_dt = ?
+        WHERE id = ?
+    ''', (url, now, video_id))
+    
+    conn.commit()
+    conn.close()
+
 def mark_video_viewed(video_id: int):
     """Marks a video as viewed."""
     conn = get_db_connection()
