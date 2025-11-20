@@ -70,8 +70,8 @@ class VideoManager:
             return
 
         try:
-            logger.info(f"Playing video {file_path} with {PLAYER_EXE_PATH}")
-            subprocess.Popen([PLAYER_EXE_PATH, file_path])
+            logger.info(f'Playing video: "{PLAYER_EXE_PATH}" "{file_path}"')
+            subprocess.Popen(f'"{PLAYER_EXE_PATH}" "{file_path}"', shell=True)
             db.mark_video_viewed(video_id)
         except Exception as e:
             logger.error(f"Failed to play video: {e}")
