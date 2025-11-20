@@ -2,6 +2,7 @@ import threading
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from app.db import video as db
 from app.core.google import GoogleManager
@@ -39,6 +40,10 @@ class VideoManager:
                     info.get('duration', ''), 
                     info.get('published_dt', '')
                 )
+                # Update URL to canonical YouTube format
+                canonical_url = f"https://www.youtube.com/watch?v={video_id}"
+                db.update_video_url(db_id, canonical_url)
+                logger.info(f"Updated URL for video {db_id} to canonical format: {canonical_url}")
             
             # 2. Download
             file_path = self.ytdlp.download_video(url, video_id)
@@ -126,3 +131,25 @@ class VideoManager:
         db.update_video_filepath(db_id, file_path)
         db.update_video_status(db_id, 'down')
         logger.info(f"Successfully marked video {db_id} as 'down'.")
+
+    def open_web_url(self, video_id: int):
+        """Opens the video URL in the default browser."""
+        video = db.get_video_by_id(video_id)
+        if not video or not video['url']:
+            logger.warning(f"Video {video_id} or URL not found.")
+            return
+
+        url = video['url']
+        try:
+            logger.info(f"Opening URL in browser: {url}")
+            # Cross-platform URL opening - let OS decide the browser
+            # subprocess.Popen doesn't wait for process output or error codes
+            if sys.platform == 'win32':
+                subprocess.Popen(f'start "" "{url}"', shell=True)
+            elif sys.platform == 'darwin':
+                subprocess.Popen(['open', url])
+            else:
+                # Linux and other Unix-like systems
+                subprocess.Popen(['xdg-open', url])
+        except Exception as e:
+            logger.error(f"Failed to open URL in browser: {e}")

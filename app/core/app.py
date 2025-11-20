@@ -94,3 +94,7 @@ class YTManagerApp:
 
     def archive_video(self, video_id: int):
         self.video_manager.archive_video(video_id)
+
+    def open_web_url(self, video_id: int):
+        """Opens the video URL in the default browser."""
+        self.video_manager.open_web_url(video_id)

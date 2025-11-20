@@ -3,8 +3,6 @@ from tkinter import ttk, messagebox
 from app.core.app import YTManagerApp
 from app.utils.logger import setup_logging
 from PIL import Image, ImageTk, ImageDraw
-import io
-import os
 
 logger = setup_logging()
 
@@ -224,11 +222,13 @@ class MainWindow(tk.Tk):
             ttk.Label(self.list_frame.scrollable_frame, text=status).grid(row=row, column=1, sticky="w", padx=5, pady=5)
             # Title
             title = video['title'] or ""
-            if len(title) > 100: title = title[:97] + "..."
+            if len(title) > 100:
+                title = title[:97] + "..."
             ttk.Label(self.list_frame.scrollable_frame, text=title).grid(row=row, column=2, sticky="w", padx=5, pady=5)
             # Channel
             channel = video['channel'] or ""
-            if len(channel) > 20: channel = channel[:17] + "..."
+            if len(channel) > 20:
+                channel = channel[:17] + "..."
             ttk.Label(self.list_frame.scrollable_frame, text=channel).grid(row=row, column=3, sticky="w", padx=5, pady=5)
             
             # Actions Frame
@@ -238,6 +238,7 @@ class MainWindow(tk.Tk):
             ttk.Button(actions_frame, text="Play", command=lambda v=video['id']: self.app_logic.play_video(v), width=6).pack(side="left", padx=2)
             ttk.Button(actions_frame, text="Del", command=lambda v=video['id']: self.delete_video(v), width=6).pack(side="left", padx=2)
             ttk.Button(actions_frame, text="Archive", command=lambda v=video['id']: self.archive_video(v), width=8).pack(side="left", padx=2)
+            ttk.Button(actions_frame, text="Web", command=lambda v=video['id']: self.app_logic.open_web_url(v), width=6).pack(side="left", padx=2)
 
     def delete_video(self, video_id):
         if messagebox.askyesno("Confirm", "Delete this video?"):
