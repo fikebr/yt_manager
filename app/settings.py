@@ -19,6 +19,9 @@ ARCHIVE_DIR = os.getenv("ARCHIVE_DIR", r"N:\Videos\_fromMPC")
 # YTDLP Config Path
 YTDLP_CONFIG_PATH = BASE_DIR / "app" / "config" / "ytdlp-config.txt"
 
+# Concurrent Downloads Limit
+CONCURRENT_DOWNLOADS = 4
+
 # Ensure directories exist
 Path(DOWNLOAD_DIR).mkdir(exist_ok=True)
 Path(ARCHIVE_DIR).mkdir(exist_ok=True)

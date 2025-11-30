@@ -186,3 +186,45 @@ def delete_video_record(video_id: int):
     # PRD: "Deletes the physical file... Updates status to closed... Sets delete_dt"
     # This function maps to that logic DB side.
     update_video_status(video_id, 'closed')
+
+def set_download_needed(video_id: int, value: str):
+    """Sets the download_needed status for a video. Valid values: 'no', 'yes', 'downloading', 'down'."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    now = datetime.datetime.now()
+    
+    cursor.execute('''
+        UPDATE videos 
+        SET download_needed = ?, modified_dt = ?
+        WHERE id = ?
+    ''', (value, now, video_id))
+    
+    conn.commit()
+    conn.close()
+
+def get_videos_by_download_needed(value: str, limit: int = None) -> List[Dict[str, Any]]:
+    """Retrieves videos by download_needed status. Returns ordered by create_dt ASC."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    query = 'SELECT * FROM videos WHERE download_needed = ? ORDER BY create_dt ASC'
+    params = [value]
+    
+    if limit:
+        query += ' LIMIT ?'
+        params.append(limit)
+    
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+def count_videos_by_download_needed(value: str) -> int:
+    """Counts videos by download_needed status."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT COUNT(*) FROM videos WHERE download_needed = ?', (value,))
+    count = cursor.fetchone()[0]
+    conn.close()
+    return count
