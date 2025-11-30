@@ -13,24 +13,29 @@ from app.utils.logger import setup_logging
 logger = setup_logging()
 
 class VideoManager:
-    def __init__(self, google_manager: GoogleManager, ytdlp_manager: YTDLPManager):
+    def __init__(self, google_manager: GoogleManager, ytdlp_manager: YTDLPManager, download_manager=None):
         self.google = google_manager
         self.ytdlp = ytdlp_manager
+        self.download_manager = download_manager
 
     def add_video(self, url: str, video_id: str):
-        """Adds a video to the database and starts background processing."""
+        """Adds a video to the database and starts background processing for metadata."""
         logger.info(f"Adding video: {url} (ID: {video_id})")
         v_id = db.add_video(url, video_id)
         db.update_video_status(v_id, 'open')
+        # Set download_needed to 'no' initially - user will mark as 'yes' to queue for download
+        db.set_download_needed(v_id, 'no')
+        self.queue_video_for_download(v_id)
 
-        # Run background task
+        # Run background task for metadata only
         thread = threading.Thread(target=self._process_video, args=(v_id, video_id, url))
         thread.start()
 
     def _process_video(self, db_id: int, video_id: str, url: str):
+        """Fetches metadata for a video. Downloads are handled by DownloadManager."""
         logger.info(f"Processing video {db_id} ({video_id})")
         try:
-            # 1. Fetch Metadata
+            # Fetch Metadata only - downloads are handled by DownloadManager
             info = self.google.get_video_info(video_id)
             if info:
                 db.update_video_metadata(
@@ -44,12 +49,6 @@ class VideoManager:
                 canonical_url = f"https://www.youtube.com/watch?v={video_id}"
                 db.update_video_url(db_id, canonical_url)
                 logger.info(f"Updated URL for video {db_id} to canonical format: {canonical_url}")
-            
-            # 2. Download
-            file_path = self.ytdlp.download_video(url, video_id)
-            db.update_video_filepath(db_id, file_path)
-            db.update_video_status(db_id, 'down')
-            logger.info(f"Video {db_id} downloaded successfully.")
             
         except Exception as e:
             logger.error(f"Error processing video {video_id}: {e}")
@@ -118,6 +117,14 @@ class VideoManager:
             logger.error(f"Failed to archive file: {e}")
             db.update_video_status(video_id, 'error', f"Archive failed: {e}")
 
+    def queue_video_for_download(self, video_id: int):
+        """Marks a video as queued for download."""
+        logger.info(f"Queueing video {video_id} for download")
+        db.set_download_needed(video_id, 'yes')
+        # Start DownloadManager if available
+        if self.download_manager:
+            self.download_manager.start_if_needed()
+
     def mark_download_complete(self, youtube_id: str, file_path: str):
         """Updates the video record upon download completion."""
         logger.info(f"Handling download completion for ID: {youtube_id}")
@@ -130,6 +137,8 @@ class VideoManager:
         db_id = video['id']
         db.update_video_filepath(db_id, file_path)
         db.update_video_status(db_id, 'down')
+        # Set download_needed to 'down' to indicate download is complete
+        db.set_download_needed(db_id, 'down')
         logger.info(f"Successfully marked video {db_id} as 'down'.")
 
     def open_web_url(self, video_id: int):

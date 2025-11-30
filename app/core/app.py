@@ -4,6 +4,7 @@ from app.db import video as db
 from app.core.google import GoogleManager
 from app.core.ytdlp import YTDLPManager
 from app.core.videos import VideoManager
+from app.core.downloader import DownloadManager
 from app.settings import DB_BROWSER_PATH, DB_PATH, TREESIZE, DOWNLOAD_DIR, ARCHIVE_DIR
 from app.utils.logger import setup_logging
 
@@ -13,8 +14,11 @@ class YTManagerApp:
     def __init__(self):
         self.google = GoogleManager()
         self.ytdlp = YTDLPManager()
-        self.video_manager = VideoManager(self.google, self.ytdlp)
+        self.download_manager = DownloadManager(self.ytdlp)
+        self.video_manager = VideoManager(self.google, self.ytdlp, self.download_manager)
         db.init_db()
+        # Check if there are any pending downloads on startup
+        self.download_manager.start_if_needed()
 
     # ----------------------------------------------------------------
     # Utility / Shared Logic
@@ -127,3 +131,8 @@ class YTManagerApp:
     def open_web_url(self, video_id: int):
         """Opens the video URL in the default browser."""
         self.video_manager.open_web_url(video_id)
+
+    def queue_video_for_download(self, video_id: int):
+        """Queues a video for download and starts DownloadManager if needed."""
+        self.video_manager.queue_video_for_download(video_id)
+        self.download_manager.start_if_needed()
