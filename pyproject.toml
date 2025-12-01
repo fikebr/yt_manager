@@ -11,4 +11,5 @@ dependencies = [
     "python-dotenv",
     "toml",
     "pillow",
+    "pyperclip",
 ]

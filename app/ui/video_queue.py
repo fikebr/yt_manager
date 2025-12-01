@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from typing import Optional
 from app.core.app import YTManagerApp
+from app.ui.clipmon import ClipboardMonitorWindow
 from app.utils.logger import setup_logging
 from PIL import Image, ImageTk, ImageDraw
 
@@ -77,6 +79,7 @@ class MainWindow(tk.Tk):
         self.app_logic = app_logic
         self.title("YT Manager v1")
         self.geometry("1100x600")
+        self.clipmon_window: Optional[ClipboardMonitorWindow] = None
 
         self._set_icon()
         self._create_widgets()
@@ -192,6 +195,9 @@ class MainWindow(tk.Tk):
         tree_archive_btn = ttk.Button(bot_frame, text="Tree Archive", command=self.open_treesize_archive)
         tree_archive_btn.pack(side="left", padx=5)
 
+        clipmon_btn = ttk.Button(bot_frame, text="Clipboard Monitor", command=self.open_clipboard_monitor)
+        clipmon_btn.pack(side="left", padx=5)
+
     def add_video(self):
         url = self.url_var.get().strip()
         if url:
@@ -257,4 +263,29 @@ class MainWindow(tk.Tk):
 
     def open_treesize_archive(self):
         self.app_logic.open_treesize_archive()
+
+    def open_clipboard_monitor(self):
+        """Open clipboard monitor window."""
+        # Check if window already exists and is still valid
+        if self.clipmon_window is not None:
+            try:
+                # Check if window still exists
+                if self.clipmon_window.winfo_exists():
+                    # Bring to front
+                    self.clipmon_window.lift()
+                    self.clipmon_window.focus()
+                    return
+            except tk.TclError:
+                # Window was destroyed, reset reference
+                self.clipmon_window = None
+        
+        # Create new window with callback to clear reference when it closes
+        def on_clipmon_close():
+            self.clipmon_window = None
+        
+        self.clipmon_window = ClipboardMonitorWindow(
+            self, 
+            self.app_logic,
+            on_close_callback=on_clipmon_close
+        )
 
